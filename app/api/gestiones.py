@@ -11,6 +11,23 @@ from app.schemas.gestion import GestionCreate, GestionResponse
 
 router = APIRouter(prefix="/gestiones", tags=["Gestiones"])
 
+@router.get("/listar", response_model=List[GestionResponse])
+def listar_gestiones(
+    skip: int = 0,
+    limit: int = 100,
+    tipo: str = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Gestion).filter(
+        Gestion.tenant_id == current_user.tenant_id
+    )
+    if tipo:
+        query = query.filter(Gestion.tipo == tipo)
+    return query.order_by(
+        Gestion.fecha_gestion.desc()
+    ).offset(skip).limit(limit).all()
+
 @router.post("/", response_model=GestionResponse)
 def crear_gestion(
     data: GestionCreate,
@@ -52,4 +69,6 @@ def historial_deudor(
     if not deudor:
         raise HTTPException(status_code=404, detail="Deudor no encontrado")
 
-    return db.query(Gestion).f
+    return db.query(Gestion).filter(
+        Gestion.deudor_id == deudor_id
+    ).order_by(Gestion.fecha_gestion.desc()).all()
