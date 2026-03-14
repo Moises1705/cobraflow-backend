@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.auth import router as auth_router
 from app.api.deudores import router as deudores_router
+from app.api.gestiones import router as gestiones_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -20,6 +21,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(deudores_router)
+app.include_router(gestiones_router)
 
 @app.get("/")
 def root():
